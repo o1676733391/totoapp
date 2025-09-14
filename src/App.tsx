@@ -1,5 +1,5 @@
 // filepath: src/App.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckSquare, Clock, BarChart3, Menu } from 'lucide-react';
 import { Button } from './components/ui/button';
 import { Card, CardContent } from './components/ui/card';
@@ -21,14 +21,24 @@ export default function App() {
     fetchTasks();
   }, []);
 
-  const fetchTasks = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/tasks`);
+// filepath: src/App.tsx
+const fetchTasks = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/tasks`);
+    console.log("API Response:", response); // Log the entire response
+    console.log("API Response Data:", response.data); // Log just the data
+    if (Array.isArray(response.data)) {
       setTasks(response.data);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
+    } else {
+      console.error('API returned invalid data:', response.data);
+      setTasks([]); // Or some other default value
     }
-  };
+    console.log("Tasks after fetch:", tasks); // Log tasks AFTER setting state
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    setTasks([]); // Or some other default value
+  }
+};
 
   const addTask = async (newTask: Omit<Task, '_id'>) => {
     try {
