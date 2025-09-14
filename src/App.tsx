@@ -33,7 +33,7 @@ const fetchTasks = async () => {
       console.error('API returned invalid data:', response.data);
       setTasks([]); // Or some other default value
     }
-    console.log("Tasks after fetch:", tasks); // Log tasks AFTER setting state
+    // console.log("Tasks after fetch:", tasks); // Log tasks AFTER setting state
   } catch (error) {
     console.error('Error fetching tasks:', error);
     setTasks([]); // Or some other default value

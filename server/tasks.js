@@ -18,10 +18,7 @@ module.exports = async (req, res) => {
       // Connect to MongoDB (only if not already connected)
       if (!mongoose.connection.readyState) {
         const uri = process.env.MONGODB_URI;
-        await mongoose.connect(uri, {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
-        });
+  await mongoose.connect(uri);
         Task = mongoose.model('Task', taskSchema); // Define Task here after connection
       }
 
