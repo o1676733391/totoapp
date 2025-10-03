@@ -1,71 +1,52 @@
-// Simple Express server for tasks API with MongoDB
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
 
-// Task schema and model
+// Task Schema
 const taskSchema = new mongoose.Schema({
-  title: String,
-  completed: Boolean,
-  priority: String,
+  title: { type: String, required: true },
+  completed: { type: Boolean, default: false },
+  priority: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' },
   dueDate: Date,
-});
-const Task = mongoose.model('Task', taskSchema);
-
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  category: String,
+  createdAt: { type: Date, default: Date.now }
 });
 
-// GET /api/tasks
+let Task;
+let conn = null;
+
+async function connectToDatabase() {
+  if (conn == null) {
+    conn = await mongoose.connect(process.env.MONGODB_URI);
+    Task = mongoose.models.Task || mongoose.model('Task', taskSchema);
+  }
+}
+
+// Routes
 app.get('/api/tasks', async (req, res) => {
+  await connectToDatabase();
   try {
-    const tasks = await Task.find();
+    const tasks = await Task.find().sort({ createdAt: -1 });
     res.json(tasks);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
-// POST /api/tasks
 app.post('/api/tasks', async (req, res) => {
+  await connectToDatabase();
   try {
     const task = new Task(req.body);
     const newTask = await task.save();
     res.status(201).json(newTask);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 });
 
-// PATCH /api/tasks/:id
-app.patch('/api/tasks/:id', async (req, res) => {
-  try {
-    const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(updatedTask);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// DELETE /api/tasks/:id
-app.delete('/api/tasks/:id', async (req, res) => {
-  try {
-    await Task.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Task deleted' });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+export default app;
