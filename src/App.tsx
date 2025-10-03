@@ -11,7 +11,7 @@ import PomodoroTimer from './components/PomodoroTimer';
 import ProgressStats from './components/ProgressStats';
 import axios from 'axios';
 
-const API_URL = '/api'; // or 'http://localhost:3000/api' for local development
+const API_URL = 'https://totoapp-yaju.vercel.app/api'; // or 'http://localhost:3000/api' for local development
 
 export default function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
